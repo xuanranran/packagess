@@ -19,8 +19,8 @@ local function online_data()
 
 			# Read ARP table for active IPv4 clients (Flags is $3, MAC is $4, IP is $1, Device is $6)
 			while ((getline < "/proc/net/arp") > 0) {
-				# ADDED FILTER: Only process lines where device is 'br-lan' or starts with 'eth'
-				if ($3 == "0x2" && $4 != "00:00:00:00:00:00" && ($6 == "br-lan" || $6 ~ /^eth/)) {
+				# MODIFIED FILTER: Only process lines where device is 'br-lan', starts with 'eth', or starts with 'wlan'
+				if ($3 == "0x2" && $4 != "00:00:00:00:00:00" && ($6 == "br-lan" || $6 ~ /^eth/ || $6 ~ /^wlan/)) {
 					mac = $4;
 					macs[mac] = 1;
 					iface[mac] = $6;
