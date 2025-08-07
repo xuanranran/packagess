@@ -8,7 +8,7 @@
 local util = require "luci.util"
 local function online_data()
 	local rv = { }
-	-- Simplified awk script focusing only on IPv4 data for maximum compatibility.
+	-- Modified awk script to filter for br-lan and eth* interfaces only.
 	local script = [[
 		BEGIN {
 			# Read DHCPv4 leases to get hostnames (MAC is $2, hostname is $4)
@@ -18,7 +18,8 @@ local function online_data()
 
 			# Read ARP table for active IPv4 clients (Flags is $3, MAC is $4, IP is $1, Device is $6)
 			while ((getline < "/proc/net/arp") > 0) {
-				if ($3 == "0x2" && $4 != "00:00:00:00:00:00") {
+				# ADDED FILTER: Only process lines where device is 'br-lan' or starts with 'eth'
+				if ($3 == "0x2" && $4 != "00:00:00:00:00:00" && ($6 == "br-lan" || $6 ~ /^eth/)) {
 					mac = $4;
 					macs[mac] = 1;
 					iface[mac] = $6;
@@ -150,7 +151,6 @@ table.cbi-section-table tbody tr:hover {
 
 /* --- 手机端优化 (< 768px) --- */
 @media (max-width: 768px) {
-  /* --- 新增：隐藏手机版顶部的表格标题行 --- */
   #online_status_table .cbi-section-table-titles {
     display: none;
   }
